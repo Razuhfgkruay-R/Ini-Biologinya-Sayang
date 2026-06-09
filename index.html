@@ -1,0 +1,919 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kuis Interaktif Biologi</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+
+        :root {
+            --primary: #4f46e5;
+            --primary-hover: #4338ca;
+            --primary-light: #e0e7ff;
+            --success: #10b981;
+            --success-light: #d1fae5;
+            --danger: #ef4444;
+            --danger-light: #fee2e2;
+            --bg: #f8fafc;
+            --card: #ffffff;
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+            --border: #e2e8f0;
+            --gradient: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+            background-color: var(--bg);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .quiz-container {
+            max-width: 640px;
+            width: 100%;
+            background: var(--card);
+            border-radius: 28px;
+            border: 1px solid rgba(226, 232, 240, 0.8);
+            box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.05);
+            position: relative;
+            overflow: hidden;
+            min-height: 500px;
+        }
+
+        /* Modern Intro Screen */
+        .intro-screen {
+            text-align: center;
+            padding: 50px 32px;
+            animation: fadeIn 0.5s ease-out;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+        }
+
+        .intro-hero {
+            width: 100px;
+            height: 100px;
+            background: var(--gradient);
+            border-radius: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            margin-bottom: 32px;
+            box-shadow: 0 15px 30px -10px rgba(79, 70, 229, 0.5);
+            transform: rotate(-5deg);
+        }
+
+        .intro-title {
+            font-size: 2.25rem;
+            font-weight: 800;
+            color: var(--text-main);
+            margin-bottom: 16px;
+            letter-spacing: -0.5px;
+            line-height: 1.2;
+        }
+
+        .intro-title span {
+            background: var(--gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .intro-desc {
+            font-size: 1.05rem;
+            color: var(--text-muted);
+            line-height: 1.6;
+            margin-bottom: 40px;
+            max-width: 480px;
+        }
+
+        .btn-main {
+            width: 100%;
+            background: var(--gradient);
+            color: white;
+            border: none;
+            padding: 18px;
+            border-radius: 16px;
+            font-size: 1.1rem;
+            font-weight: 700;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            transition: all 0.3s ease;
+            box-shadow: 0 10px 20px -10px rgba(79, 70, 229, 0.5);
+        }
+
+        .btn-main:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 25px -10px rgba(79, 70, 229, 0.6);
+        }
+
+        /* Quiz Interface Styles */
+        #quiz-window {
+            display: none;
+            padding: 32px;
+            animation: fadeIn 0.4s ease;
+        }
+
+        .quiz-header {
+            margin-bottom: 28px;
+        }
+
+        .top-bar-controls {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+
+        .btn-back-icon {
+            background: var(--bg);
+            border: 1px solid var(--border);
+            color: var(--text-main);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
+            transition: all 0.2s ease;
+        }
+
+        .btn-back-icon:hover {
+            background-color: var(--border);
+        }
+
+        .progress-bar {
+            flex-grow: 1;
+            height: 8px;
+            background-color: var(--bg);
+            border-radius: 100px;
+            overflow: hidden;
+            border: 1px solid var(--border);
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: var(--gradient);
+            width: 0%;
+            transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .question-number {
+            font-size: 0.9rem;
+            color: var(--primary);
+            font-weight: 700;
+            white-space: nowrap;
+            background: var(--primary-light);
+            padding: 6px 12px;
+            border-radius: 100px;
+        }
+
+        .question-text {
+            font-size: 1.2rem;
+            font-weight: 700;
+            line-height: 1.6;
+            color: var(--text-main);
+        }
+
+        .question-image {
+            width: 100%;
+            max-height: 350px;
+            object-fit: contain;
+            background-color: #ffffff;
+            border-radius: 16px;
+            margin-top: 16px;
+            border: 2px solid var(--border);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+            padding: 10px;
+        }
+
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .option-btn {
+            background-color: var(--card);
+            border: 2px solid var(--border);
+            padding: 16px 20px;
+            border-radius: 16px;
+            text-align: left;
+            font-size: 1.05rem;
+            color: var(--text-main);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-family: inherit;
+        }
+
+        .option-btn:hover:not([disabled]) {
+            border-color: var(--primary);
+            background-color: var(--bg);
+        }
+
+        .option-btn.correct {
+            background-color: var(--success-light);
+            border-color: var(--success);
+            color: #065f46;
+        }
+
+        .option-btn.wrong {
+            background-color: var(--danger-light);
+            border-color: var(--danger);
+            color: #991b1b;
+        }
+
+        .option-btn:disabled {
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+        
+        .option-btn.correct:disabled, .option-btn.wrong:disabled {
+            opacity: 1;
+        }
+
+        .status-icon {
+            display: none;
+            width: 22px;
+            height: 22px;
+        }
+
+        .option-btn.correct .icon-correct,
+        .option-btn.wrong .icon-wrong {
+            display: block;
+        }
+
+        .reason-box {
+            margin-top: 24px;
+            padding: 20px;
+            background-color: var(--primary-light);
+            border-radius: 16px;
+            border: 1px solid #c7d2fe;
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .reason-title {
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 800;
+            color: var(--primary-hover);
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .reason-text {
+            font-size: 1rem;
+            line-height: 1.5;
+            color: var(--primary-hover);
+            font-weight: 500;
+        }
+
+        /* Result Screen */
+        .result-screen {
+            text-align: center;
+            display: none;
+            padding: 40px 32px;
+            animation: fadeIn 0.4s ease;
+        }
+
+        .score-badge {
+            display: inline-block;
+            background: var(--primary-light);
+            padding: 40px;
+            border-radius: 50%;
+            margin: 24px 0;
+            border: 8px solid white;
+            box-shadow: 0 10px 25px -5px rgba(79, 70, 229, 0.2);
+        }
+
+        .score {
+            font-size: 5rem;
+            font-weight: 800;
+            background: var(--gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            line-height: 1;
+        }
+
+        .result-title {
+            font-size: 2rem;
+            font-weight: 800;
+            margin-bottom: 8px;
+        }
+
+        .result-summary {
+            color: var(--text-muted);
+            font-size: 1.1rem;
+            line-height: 1.6;
+            margin-bottom: 8px;
+        }
+
+        .watermark {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            font-weight: 700;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            margin-top: 30px;
+            text-align: center;
+            opacity: 0.5;
+        }
+
+        /* Floating AI Control Panel */
+        .ai-floating-btn {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background-color: #0f172a;
+            color: white;
+            border: none;
+            border-radius: 100px;
+            padding: 14px 24px;
+            font-size: 0.95rem;
+            font-weight: 700;
+            box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.3);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: all 0.3s ease;
+            z-index: 999;
+            font-family: inherit;
+        }
+
+        .ai-floating-btn:hover {
+            background-color: #1e293b;
+            transform: translateY(-3px);
+            box-shadow: 0 15px 30px -5px rgba(15, 23, 42, 0.4);
+        }
+
+        .ai-modal {
+            display: none;
+            position: fixed;
+            bottom: 96px;
+            right: 30px;
+            width: 320px;
+            background: var(--card);
+            border-radius: 24px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.2);
+            border: 1px solid var(--border);
+            overflow: hidden;
+            z-index: 1000;
+            animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        @keyframes slideUp {
+            from { transform: translateY(20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.98); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        .ai-modal-header {
+            background: var(--bg);
+            padding: 18px 24px;
+            font-size: 0.85rem;
+            font-weight: 800;
+            color: var(--text-muted);
+            letter-spacing: 1px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .ai-modal-close {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            font-size: 1.25rem;
+            display: flex;
+            align-items: center;
+        }
+
+        .ai-modal-close:hover { color: var(--text-main); }
+
+        .ai-options-list {
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .ai-link-btn {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 14px 18px;
+            color: var(--text-main);
+            font-size: 1rem;
+            font-weight: 700;
+            border-radius: 16px;
+            transition: all 0.2s ease;
+            background: var(--bg);
+            border: 1px solid transparent;
+            width: 100%;
+            cursor: pointer;
+            font-family: inherit;
+        }
+
+        .ai-link-btn:hover {
+            border-color: var(--border);
+            transform: translateY(-1px);
+        }
+
+        .ai-brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .ai-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+        }
+
+        /* Kalytera In-frame Widget Styles */
+        .kalytera-widget {
+            display: none;
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 400px;
+            height: 650px;
+            max-height: 85vh;
+            max-width: 90vw;
+            background: var(--card);
+            border-radius: 28px;
+            box-shadow: 0 30px 60px -15px rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--border);
+            flex-direction: column;
+            overflow: hidden;
+            z-index: 1001;
+            animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .kalytera-header {
+            background: #8b5cf6;
+            padding: 20px 24px;
+            color: white;
+            font-weight: 700;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 1.05rem;
+            letter-spacing: 0.5px;
+        }
+
+        .kalytera-close {
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            transition: all 0.2s;
+        }
+
+        .kalytera-close:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: rotate(90deg);
+        }
+
+        .kalytera-iframe {
+            width: 100%;
+            flex-grow: 1;
+            border: none;
+            background: #ffffff;
+        }
+    </style>
+</head>
+<body>
+
+<div class="quiz-container">
+
+    <!-- 1. INTRO SCREEN -->
+    <div id="intro-window" class="intro-screen">
+        <div class="intro-hero">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
+        </div>
+        <h1 class="intro-title">Kuis <span>Biologi</span> Dasar</h1>
+        <p class="intro-desc">Uji pemahamanmu mengenai anatomi dan fisiologi tubuh manusia. Kuis ini terdiri dari <strong id="total-q-intro" style="color: var(--primary);">...</strong> soal yang akan diacak otomatis setiap sesi.</p>
+        
+        <button class="btn-main" onclick="startQuiz()">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+            <span>Mulai Kuis Sekarang</span>
+        </button>
+    </div>
+
+    <!-- 2. QUIZ INTERFACE -->
+    <div id="quiz-window">
+        <div class="quiz-header">
+            <div class="top-bar-controls">
+                <button class="btn-back-icon" onclick="goBack()" title="Kembali ke Soal Sebelumnya">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+                </button>
+                <div class="progress-bar"><div class="progress-fill" id="progress"></div></div>
+                <div class="question-number" id="q-num">1 / 50</div>
+            </div>
+            <div class="question-text" id="q-text">Loading pertanyaan...</div>
+        </div>
+        
+        <div class="options" id="options-container"></div>
+        
+        <div class="reason-box" id="reason-box">
+            <div class="reason-title">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                Kunci Jawaban
+            </div>
+            <div class="reason-text" id="reason-text">Alasan jawaban.</div>
+        </div>
+        
+        <button class="btn-main" id="next-btn" style="display:none; margin-top:32px;" onclick="nextQuestion()">
+            <span id="next-btn-text">Selanjutnya</span>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+        </button>
+    </div>
+
+    <!-- 3. RESULT INTERFACE -->
+    <div id="result-window" class="result-screen">
+        <div class="result-title">Selesai! 🎉</div>
+        <p class="result-summary" style="margin-bottom: 0;">Skor akhir penguasaan materimu:</p>
+        <div class="score-badge">
+            <div class="score" id="final-score">0</div>
+        </div>
+        <p class="result-summary" id="score-summary" style="font-weight: 600; color: var(--text-main);">Evaluasi selesai.</p>
+        
+        <button class="btn-main" style="margin-top: 32px;" onclick="startQuiz()">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"></polyline><polyline points="23 20 23 14 17 14"></polyline><path d="M20.49 9A9 9 0 0 0 5.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 0 1 3.51 15"></path></svg>
+            <span>Ulangi Kuis (Acak Soal)</span>
+        </button>
+        <button class="btn-secondary" style="margin-top: 16px; border:none; background:var(--bg);" onclick="showIntro()">
+            <span>Kembali ke Menu Utama</span>
+        </button>
+    </div>
+</div>
+
+<div class="watermark">powered by razuhfgkruay</div>
+
+<!-- Floating AI Widget -->
+<button class="ai-floating-btn" onclick="toggleAiModal()">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
+    <span>Tanya AI Asisten</span>
+</button>
+
+<div class="ai-modal" id="aiModal">
+    <div class="ai-modal-header">
+        <span>PILIH ASISTEN AI</span>
+        <button class="ai-modal-close" onclick="toggleAiModal()">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        </button>
+    </div>
+    <div class="ai-options-list">
+        <button onclick="openKalytera()" class="ai-link-btn" style="background-color: #f3e8ff; border-color:#d8b4fe;">
+            <div class="ai-brand">
+                <div class="ai-dot" style="background-color: #9333ea;"></div>
+                <span style="color: #7e22ce;">Kalytera AI</span>
+            </div>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#7e22ce" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
+        </button>
+        <button onclick="openAiWindow('https://gemini.google.com')" class="ai-link-btn">
+            <div class="ai-brand">
+                <div class="ai-dot" style="background-color: #2563eb;"></div>
+                <span>Google Gemini</span>
+            </div>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
+        </button>
+        <button onclick="openAiWindow('https://chatgpt.com')" class="ai-link-btn">
+            <div class="ai-brand">
+                <div class="ai-dot" style="background-color: #10a37f;"></div>
+                <span>OpenAI ChatGPT</span>
+            </div>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
+        </button>
+        <button onclick="openAiWindow('https://claude.ai')" class="ai-link-btn">
+            <div class="ai-brand">
+                <div class="ai-dot" style="background-color: #d97757;"></div>
+                <span>Anthropic Claude</span>
+            </div>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
+        </button>
+    </div>
+</div>
+
+<!-- Jendela Iframe Kalytera AI -->
+<div class="kalytera-widget" id="kalyteraWidget">
+    <div class="kalytera-header">
+        <div style="display:flex; align-items:center; gap:10px;">
+            <div style="width:12px; height:12px; background:#fff; border-radius:50%; box-shadow: 0 0 10px rgba(255,255,255,0.8);"></div>
+            Kalytera Assistant
+        </div>
+        <button class="kalytera-close" onclick="closeKalytera()">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        </button>
+    </div>
+    <iframe class="kalytera-iframe" src="https://kalytera-ai.vercel.app/" allow="microphone; camera; clipboard-write"></iframe>
+</div>
+
+<script>
+// Data 63 Soal Biologi
+let quizData = [
+    {q: "Kelelahan otot terjadi akibat penimbunan ....", o: ["Asam piruvat", "Asam laktat", "Glukosa", "ADP", "ATP"], a: 1},
+    {q: "Ammonia merupakan zat sisa metabolisme dari…", o: ["Amilum", "Glukosa", "Protein", "Vitamin", "Lemak"], a: 2},
+    {q: "Bagian medula kelenjar adrenal menghasilkan hormon adrenalin. Hormon tersebut berfungsi …", o: ["Merangsang pertumbuhan", "Menurunkan tekanan darah", "Meningkatkan tekanan darah", "Menurunkan kadar gula darah", "Mengontrol keseimbangan garam and ion"], a: 2},
+    {q: "Radang paru-paru disebabkan oleh infeksi bakteri…", o: ["Mycobacterium tuberculosis", "Diplococcus pneumoniae", "Corynebacterium diphtheriae", "Clostridium tetani", "Salmonella typhi"], a: 1},
+    {q: "Hubungan antara tulang yang tidak memungkinkan terjadinya gerak seperti tulang-tulang penyusun tengkorak disebut ...", o: ["Sinkondrosis", "Amfiartrosis", "Sinartrosis", "Diartrosis", "Artikulasi"], a: 2},
+    {q: "Seseorang yang pernah terinfeksi virus campak akan mempunyai kekebalan terhadap penyakit campak, karena di dalam tubuhnya telah terbentuk ….", o: ["Sel B plasma", "Sel B pengingat", "Sel B pembelah", "Sel T pembunuh", "Sel T supresor"], a: 1},
+    {q: "Otot dapat berkontraksi karena memperoleh energi dari pemecahan ...", o: ["Laktasinogen", "Asam laktat", "Glikogen", "Glukosa", "ATP"], a: 4},
+    {q: "Penyakit TBC dapat dicegah menggunakan vaksin…", o: ["BCG", "DPT", "Polio", "PPV", "PCV7"], a: 0},
+    {q: "Pernyataan yang tepat mengenai sinapsis pada sistem saraf adalah ...", o: ["Sinapsis adalah penyempitan pada selubung lemak yang mengelilingi akson", "Sinapsis adalah daerah yang dilalui impuls dari sel saraf satu ke sel saraf lain", "Sinapsis adalah membran sel yang mengelilingi serabut saraf", "Sinapsis adalah selubung lemak yang mengelilingi akson", "Sinapsis adalah daerah yang terdapat inti sel"], a: 1},
+    {q: "Reaksi yang terjadi pada waktu pernapasan dalam (internal), yaitu…", o: ["Hb + O2 → HbO2", "HbO2 → Hb + O2", "H+ + HCO3- → H2CO3", "H2CO3 → H2O + CO2", "HbCO2 → Hb + CO2"], a: 1},
+    {q: "Saat kita melakukan gerak refleksi (menekuk lengan), keadaan otot adalah ...", o: ["Otot ekstensor berelaksasi dan otot fleksor berkontraksi", "Otot bisep berelaksasi dan otot trisep berkontraksi", "Otot bisep berkontraksi dan otot trisep berelaksasi", "Otot ekstensor dan fleksor berkontraksi", "Otot bisep dan otot trisep berelaksasi"], a: 2},
+    {q: "Seseorang yang telah lanjut usia biasanya mengalami gangguan mata berupa….", o: ["Miopi", "Juling", "Presbiopi", "Astigmatisme", "Hipermetropi"], a: 2},
+    {q: "Melemahnya otot akibat cacat genetis disebut …", o: ["Hernia abdominal", "Hipertrofi", "Tetanus", "Distrofi", "Atrofi"], a: 3},
+    {q: "Bagian-bagian organ mata:\n(1) Retina\n(2) Kornea\n(3) Lensa\n(4) Pupil\n(5) Vitreous humor\n(6) Aqueous humor\nCahaya yang ditangkap mata berturut-turut akan melalui …", o: ["(1)-(2)-(3)-(4)-(5)-(6)", "(1)-(6)-(4)-(3)-(5)-(2)", "(2)-(3)-(4)-(5)-(6)-(1)", "(2)-(5)-(4)-(3)-(6)-(1)", "(2)-(6)-(4)-(3)-(5)-(1)"], a: 4},
+    {q: "Ketidakmampuan seseorang dengan kejadian-kejadian dalam suatu periode di masa lampau disebabkan goncangan batin atau cedera otak sehingga lupa akan identitas dirinya atau orang lain atau kejadian-kejadian yang mula-mula dikenalnya dengan baik disebut ….", o: ["Alzheimer", "Meningitis", "Amnesia", "Insomnia", "Epilepsy"], a: 2},
+    {q: "Bagian dari sel saraf yang berfungsi untuk mempercepat rangsangan atau impuls ke otak dan sebaliknya adalah …", o: ["Neurit", "Selubung mielin", "Nodus ranvier", "Sel schwan", "Dendrit"], a: 2},
+    {q: "Selain uap air, zat yang diekspirasi oleh paru-paru dalam bentuk…", o: ["Karbon dioksida", "Oksigen", "Karbon monoksida", "Karbon hidrogen", "Nitrogen"], a: 0},
+    {q: "Struktur organ saraf dengan bagian luarnya terdiri atas substansi putih dan bagian dalamnya terdiri atas substansi abu-abu adalah …", o: ["Otak", "Medulla spinalis", "Mesensefalon", "Serebelum", "Serebrum"], a: 1},
+    // Menggunakan Link Baru yang Valid untuk Struktur Neuron
+    {q: "Perhatikan gambar struktur neuron berikut!<br><img src='https://i.postimg.cc/52pGnTPB/oleh-gambar-1.png' class='question-image' alt='Struktur Neuron'><br>Bagian yang ditunjukan oleh nomor 1 berfungsi untuk …", o: ["Melindungi neurit", "Mengatur kegiatan sel", "Mempercepat gerakan impuls", "Menghantar impuls menjauhi badan sel", "Menghantar rangsangan ke badan sel saraf"], a: 4},
+    {q: "Fimbriae pada oviduk berfungsi ….", o: ["Membantu pematangan ovum", "Menajga kelembaban sel telur", "Memberi nutrisi sel telur", "Menangkap sel telur", "Menangkap embrio"], a: 3},
+    {q: "Alat yang digunakan untuk mengukur volume dan kapasitas paru-paru adalah…", o: ["Pulmotor", "Thermometer", "Sfigmomanometer", "Stetoskop", "Spirometer"], a: 4},
+    {q: "Fungsi hormon Follicle Stimulating Hormone (FSH) adalah …", o: ["Merangsang korpus luteum untuk menyekresikan progesteron dan estrogen", "Memelihara pertumbuhan dan perkembangan kelenjar tiroid", "Merangsang sel-sel folikel untuk menghasilkan estrogen", "Untuk menyekresikan hormon testosteron", "Merangsang kontraksi usus"], a: 2},
+    {q: "Ketika otot diafragma berkontraksi maka posisi diafragma….", o: ["Mendatar dan mengakibatkan rongga dada mengecil", "Mendatar dan mengakibatkan rongga dada membesar", "Naik dan rongga dada membesar", "Naik dan rongga dada mengecil", "Turun dan rongga dada membesar"], a: 1},
+    {q: "Gangguan pada sistem reproduksi wanita yang ditandai ketidakhadiran menstruasi meski sudah memasuki masa puber adalah ...", o: ["Endometriosis", "Epididimitis", "Amenore", "Mioma", "Orkitis"], a: 2},
+    {q: "Saat terjadi ovulasi, sel telur yang dilepaskan adalah ...", o: ["Badan polosit II", "Oosit sekunder", "Badan polosit I", "Oosit primer", "Ootid"], a: 1},
+    {q: "Selama berlangsungnya spermatogenesis, hormon testosterone berperan penting dalam proses pematangan sperma. Hormon ini dihasilkan oleh …", o: ["Sel Sertoli", "Sel Leydig", "Kelenjar prostat", "Kelenjar cowper", "Vesikula seminalis"], a: 1},
+    {q: "Perhatikan organ pernapasan berikut!\n(1) Trakea\n(2) Hidung\n(3) Alveolus\n(4) Bronkiolus\n(5) Faring\n(6) Bronkus\nJalur inspirasi pada pernapasan manusia, yaitu…", o: ["(2)-(1)-(5)-(6)-(4)-(3)", "(2)-(3)-(5)-(1)-(6)-(4)", "(2)-(4)-(6)-(5)-(3)-(1)", "(2)-(5)-(1)-(6)-(4)-(3)", "(2)-(6)-(4)-(1)-(5)-(3)"], a: 3},
+    {q: "FSH adalah hormon yang dihasilkan kelenjar hipofisis. Pengaruh hormon ini pada sistem reproduksi adalah …", o: ["Membantu peluruhan dinding uterus", "Membantu proses pelepasan sel telur", "Merangsang produksi hormon estrogen", "Merangsang proses pertumbuhan sel telur", "Mempengaruhi penebalan dinding uterus"], a: 3},
+    {q: "Penderita TBC mengalami gangguan susah napas, sebab terjadi…", o: ["Penurunan jumlah eritrosit", "Gangguan proses difusi O2", "Penurunan kadar hemoglobin", "Kontraksi otot polos trakea", "Penyempitan rongga alveolus"], a: 1},
+    // Menggunakan Link Baru yang Valid untuk Spermatogenesis
+    {q: "Perhatikan gambar spermatogenesis berikut!<br><img src='https://i.postimg.cc/hthbRYDZ/ditunjuk-no-3-dan-4.png' class='question-image' alt='Spermatogenesis'><br>Bagian yang ditunjuk nomor (3) dan (4) serta pembelahan yang terjadi adalah …", o: ["Spermatosit primer, spermatosit sekunder, dan meiosis I", "Spermatosit sekunder, spermatid, dan meiosis II", "Spermatogonium, spermatosit primer, dan mitosis", "Sel primordial, spermatogonium, dan meiosis", "Sel primordial, spermatogonium, dan mitosis"], a: 1},
+    {q: "Fungsi silia pada trakea, yaitu…", o: ["Membuat lendir mengalir ke faring", "Memperkuat dinding trakea", "Membuat dan mengeluarkan lendir", "Menghangatkan udara pernapasan yang masuk", "Menangkap kuman yang masuk bersama udara pernapasan"], a: 4},
+    // Menggunakan Link Baru yang Valid untuk Oogenesis
+    {q: "Perhatikan gambar oogenesis berikut!<br><img src='https://i.postimg.cc/zfKhJZ9C/perhatikan-gambar-oogenesis.png' class='question-image' alt='Oogenesis'><br>Sel yang terbentuk dari hasil mitosis dan meiosis I secara berurutan adalah ….", o: ["1 dan 2", "1 dan 3", "2 dan 4", "3 dan 4", "3 dan 5"], a: 2},
+    {q: "Organ pernapasan yang menghubungkan hidung dengan tenggorokan yang menstimulus rasa sakit pada hidung ketika tersedak adalah…", o: ["Nasofaring", "Epiglottis", "Trakea", "Laring", "Faring"], a: 4},
+    {q: "Hormon yang memengaruhi peningkatan sekresi ASI di masa kehamilan adalah ...", o: ["Progesteron", "Estrogen", "Prolaktin", "FSH", "LH"], a: 2},
+    {q: "Dalam sistem ekskresi, hati mengeluarkan sisa metabolisme dalam bentuk…", o: ["O2", "Urine", "Keringat", "Cairan empedu", "CO2"], a: 3},
+    {q: "Urea merupakan zat sisa yang dibuang melalui urine. Pembentukan urea berlangsung di…", o: ["Kulit", "Ginjal", "Paru-paru", "Hati", "Empedu"], a: 3},
+    {q: "Zat-zat diuretika seperti kopi dan alkohol dapat meningkatkan volume urine karena…", o: ["Meningkatkan sekresi ADH", "Memacu kerja ADH", "Menghambat reabsorpsi air", "Memacu filtrasi di kapsul Bowman", "Menghambat reabsorpsi NA+"], a: 2},
+    {q: "Merokok dapat mengganggu kesehatan paru-paru, karena di dalam tembakau terdapat zat racun yang dapat merusak paru-paru, yaitu…", o: ["Tembaga", "Nikotin", "Minyak atsiri", "Merkuri", "Kafein"], a: 1},
+    {q: "Apabila urine seseorang dites menggunakan biuret menghasilkan warna ungu, dapat diduga bahwa bagian ginjal yang mengalami kelainan, yaitu…", o: ["Glomerulus", "Badan malpighi", "Kapsula bowman", "Tubulus kontortus distal", "Tubulus kontortus proksimal"], a: 0},
+    {q: "Fungsi hormon anti diuretika (ADH) adalah untuk mengatur jumlah…", o: ["Urine sedikit", "Urine banyak", "Urine yang banyak and sedikit", "Urine tidak dapat keluar", "Urine berwarna merah"], a: 2},
+    {q: "Neuron yang berfungsi untuk menghantarkan impuls saraf dari alat indra menuju ke otak atau sumsum tulang belakang adalah neuron…", o: ["Sensorik", "Motorik", "Bipolar", "Unipolar", "Konektor"], a: 0},
+    {q: "Gerak yang dilakukan oleh kerja jantung yang memompa darah merupakan gerak yang diatur oleh…", o: ["Sistem saraf tak sadar", "Sistem saraf sadar", "Sumsum tulang belakang", "Otak besar", "Otak tengah"], a: 0},
+    {q: "Insulin dihasilkan oleh kelenjar pankreas dan berperan dalam metabolisme tubuh, yaitu…", o: ["Mengatur kadar gula dalam darah", "Membantu daya absorpsi lemak", "Mengatur tekanan darah dalam arteri", "Menetralisir zat-zat yang berbahaya", "Mengatur keseimbangan air dan garam dalam darah"], a: 0},
+    {q: "Sekresi pulau-pulau Langerhans yang terdapat pada pankreas berfungsi untuk…", o: ["Mengubah glukosa menjadi glikogen", "Mengubah lemak menjadi asam lemak", "Menghasilkan tripsin", "Mengubah protein menjadi asam amino", "Menghasilkan erepsin"], a: 0},
+    {q: "Kelemahan alat kontrasepsi menggunakan pil KB, yaitu…", o: ["Cara pemakaiannya sulit", "Menyebabkan anemia", "Menunrunkan produksi ASI", "Kesuburan cepat pulih kembali", "Diminum pada masa subur"], a: 2},
+    {q: "Bagian pangkal oviduk membentuk corong yang disebut…", o: ["Fimbriae", "Uterus", "Serviks", "Vagina", "Infundibulum"], a: 4},
+    {q: "Panjang embrio sekitar 6 cm, kepala lebih besar dari badannya, mata, telinga, hidung, jari, mulai terbentuk dan mengalami perkembangan. Hal tersebut merupakan embrio manusia pada usia… minggu.", o: ["10", "8", "4", "32", "5"], a: 0},
+    {q: "Zigot yang mengalami pembelahan mitosis menjadi 32 sel disebut….", o: ["Janin", "Morula", "Blastula", "Tropoblas", "Embrioblas"], a: 1},
+    {q: "Proses pembentukan gamet di dalam alat reproduksi disebut…", o: ["Spermatozoid", "Oogenesis", "Gametogenesis", "Sporulasi", "Fertilisasi"], a: 2},
+    {q: "Proses pembentukan ovum dimulai sejak...", o: ["Masa balita", "Masa puber", "Bayi ketika lahir", "Masa anak-anak", "Janin dalam kandungan"], a: 4},
+    {q: "Pernyataan di bawah ini berkaitan dengan masa reproduksi pada perempuan, kecuali...", o: ["Menstruasi terjadi karena tidak terjadi peristiwa pembuahan", "Kadar progesteron tinggi pada rahim menghambat menstruasi", "Perempuan hamil memiliki payudara tampak lebih mengembang karena pengaruh progesteron dan estrogen", "Kadar progesteron menurun, menstruasi terjadi kembali", "Pada saat hamil menstruasi terjadi secara tidak teratur"], a: 4},
+    {q: "Reaksi imunisasi ketika virus atau bakteri menginfeksi tubuh, yaitu terjadinya reaksi antara…", o: ["Antibodi-imunoglobulin", "Antibodi-antigen", "Antigen-imunogen", "Limfosit-virus", "Leukosit-bakteri"], a: 1},
+    {q: "Virus penyebab penyakit AIDS adalah…", o: ["Mumps Virus", "Ebola Virus", "Measles Virus", "Human Papilloma Virus", "Human Immunodeficiency Virus"], a: 4},
+    {q: "Penderita alergi memiliki terlalu banyak … yang dihasilkan oleh sel-sel B.", o: ["IgA", "IgD", "IgE", "IgG", "IgM"], a: 2},
+    {q: "Pada Oogenesis jumlah sel yang terbentuk pada akhir telofase II adalah …", o: ["1 sel oosit sekunder dan 3 sel badan kutub primer", "1 sel oosit dan 3 badan polar sekunder", "1 sel fungsional dan 3 oosit sekunder", "3 sel oosit dan 1 sel ovum fungsional", "3 sel kutub primer dan 1 oosit primer"], a: 1},
+    {q: "Hormon yang berperan merangsang sel-sel Sertoli dalam tubulus seminiferus untuk mengubah sel-sel spermatid menjadi sperma saat terjadi spermatogenesis adalah hormon …", o: ["LH", "FSH", "Progesteron", "Testosterone", "Estrogen"], a: 1},
+    {q: "Dalam oogenesis terdapat tahap pematangan yang dimulai…", o: ["Sejak balita", "Pada masa puber", "Pada umur 1 tahun", "Sejak bayi dalam kandungan", "Sejak memasuki masa menopause"], a: 1},
+    {q: "Jenis penyakit kelamin berikut yang hanya dialami oleh pria adalah ...", o: ["Herpes genitalis", "Klamidia", "Gonore", "Orkitis", "AIDS"], a: 3},
+    {q: "Perhatikan organ reproduksi pada laki-laki berikut!\n(1) Epididimis\n(2) Vas deferens\n(3) Uretra\n(4) Saluran ejakulasi\nUrutan saluran jalannya sperma dari testis adalah ...", o: ["1, 2, 3, dan 4", "1, 2, 4, dan 3", "3, 2, 1, dan 4", "4, 3, 1, dan 2", "4, 1, 2, dan 3"], a: 1},
+    {q: "Bagian dari sistem reproduksi pria yang dihilangkan saat khitan adalah ....", o: ["Korpus kavernosa", "Testis", "Preputium", "Skrotum", "Korpus spongiosum"], a: 2},
+    {q: "Luruhnya lapisan jaringan endometrium atau dinding rahim karena tidak terjadi implantasi dinamakan ...", o: ["Fertilisasi", "Kopulasi", "Menstruasi", "Oogenesis", "Gestasi"], a: 2},
+    {q: "Alat reproduksi wanita terdiri atas:\n(1) Vagina\n(2) Ovarium\n(3) Tuba fallopi\n(4) Uterus\nJalannya sel telur sejak dibentuk sampai menjadi embrio secara berurutan dimulai dari ....", o: ["2-3-4", "2-1-4", "2-4-3", "3-1-4", "1-2-4"], a: 0},
+    {q: "Hormon yang menyebabkan kontraksi uterus pada saat melahirkan adalah ...", o: ["Prolaktin", "Progesteron", "Estrogen", "Oksitosin", "Vasopressin"], a: 3}
+];
+
+let currentQuestionIndex = 0;
+let userAnswers = [];
+
+function shuffleArray(array) {
+    for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+    }
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+    document.getElementById("total-q-intro").innerText = quizData.length;
+});
+
+function showIntro() {
+    document.getElementById("intro-window").style.display = "flex";
+    document.getElementById("quiz-window").style.display = "none";
+    document.getElementById("result-window").style.display = "none";
+}
+
+function startQuiz() {
+    document.getElementById("intro-window").style.display = "none";
+    document.getElementById("quiz-window").style.display = "block";
+    document.getElementById("result-window").style.display = "none";
+    
+    currentQuestionIndex = 0;
+    userAnswers = new Array(quizData.length).fill(null);
+    shuffleArray(quizData);
+    loadQuestion();
+}
+
+function loadQuestion() {
+    const currentQuestion = quizData[currentQuestionIndex];
+    document.getElementById("progress").style.width = `${((currentQuestionIndex) / quizData.length) * 100}%`;
+    document.getElementById("q-num").innerText = `${currentQuestionIndex + 1} / ${quizData.length}`;
+    document.getElementById("q-text").innerHTML = currentQuestion.q.replace(/\n/g, "<br>");
+    
+    const optionsContainer = document.getElementById("options-container");
+    optionsContainer.innerHTML = "";
+    document.getElementById("reason-box").style.display = "none";
+    
+    if (currentQuestionIndex === quizData.length - 1) {
+        document.getElementById("next-btn-text").innerText = "Selesaikan Kuis";
+    } else {
+        document.getElementById("next-btn-text").innerText = "Selanjutnya";
+    }
+
+    const hasAnswered = userAnswers[currentQuestionIndex] !== null;
+
+    currentQuestion.o.forEach((option, index) => {
+        const button = document.createElement("button");
+        button.className = "option-btn";
+        
+        const textSpan = document.createElement("span");
+        textSpan.innerText = `${String.fromCharCode(97 + index)}. ${option}`;
+        button.appendChild(textSpan);
+
+        const iconSvg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+        iconSvg.setAttribute("class", "status-icon");
+        iconSvg.setAttribute("viewBox", "0 0 24 24");
+        iconSvg.setAttribute("fill", "none");
+        iconSvg.setAttribute("stroke", "currentColor");
+        iconSvg.setAttribute("stroke-width", "3");
+        iconSvg.setAttribute("stroke-linecap", "round");
+        iconSvg.setAttribute("stroke-linejoin", "round");
+        button.appendChild(iconSvg);
+
+        if (!hasAnswered) {
+            button.onclick = () => selectOption(index, button);
+        } else {
+            button.disabled = true;
+        }
+
+        optionsContainer.appendChild(button);
+    });
+
+    if (hasAnswered) {
+        restoreAnswerUI(userAnswers[currentQuestionIndex], currentQuestion.a);
+    } else {
+        document.getElementById("next-btn").style.display = "none";
+    }
+}
+
+function selectOption(selectedIndex, clickedButton) {
+    const currentQuestion = quizData[currentQuestionIndex];
+    userAnswers[currentQuestionIndex] = selectedIndex;
+    restoreAnswerUI(selectedIndex, currentQuestion.a);
+}
+
+function restoreAnswerUI(selectedIndex, correctIndex) {
+    const allButtons = document.querySelectorAll(".option-btn");
+    allButtons.forEach(btn => btn.disabled = true);
+    
+    const clickedButton = allButtons[selectedIndex];
+    
+    if (selectedIndex === correctIndex) {
+        clickedButton.classList.add("correct");
+        clickedButton.querySelector(".status-icon").innerHTML = '<polyline points="20 6 9 17 4 12"></polyline>';
+        clickedButton.querySelector(".status-icon").classList.add("icon-correct");
+    } else {
+        clickedButton.classList.add("wrong");
+        clickedButton.querySelector(".status-icon").innerHTML = '<line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line>';
+        clickedButton.querySelector(".status-icon").classList.add("icon-wrong");
+        
+        const correctButton = allButtons[correctIndex];
+        correctButton.classList.add("correct");
+        correctButton.querySelector(".status-icon").innerHTML = '<polyline points="20 6 9 17 4 12"></polyline>';
+        correctButton.querySelector(".status-icon").classList.add("icon-correct");
+    }
+    
+    document.getElementById("reason-text").innerText = `Kunci yang tepat adalah opsi ${String.fromCharCode(97 + correctIndex)}.`;
+    document.getElementById("reason-box").style.display = "block";
+    document.getElementById("next-btn").style.display = "flex";
+}
+
+function goBack() {
+    if (currentQuestionIndex > 0) {
+        currentQuestionIndex--;
+        loadQuestion();
+    } else {
+        showIntro();
+    }
+}
+
+function nextQuestion() {
+    if (currentQuestionIndex < quizData.length - 1) {
+        currentQuestionIndex++;
+        loadQuestion();
+    } else {
+        showResults();
+    }
+}
+
+function showResults() {
+    document.getElementById("quiz-window").style.display = "none";
+    document.getElementById("result-window").style.display = "block";
+    
+    let correctCount = 0;
+    quizData.forEach((q, index) => {
+        if (userAnswers[index] === q.a) {
+            correctCount++;
+        }
+    });
+
+    let finalScore = Math.round((correctCount / quizData.length) * 100);
+    if(finalScore > 100) finalScore = 100;
+    
+    document.getElementById("final-score").innerText = finalScore;
+    
+    let summary = "";
+    if (finalScore >= 90) summary = "Luar biasa! Penguasaan materi biologimu sangat matang.";
+    else if (finalScore >= 70) summary = "Kerja bagus! Teorimu sudah cukup kuat.";
+    else if (finalScore >= 50) summary = "Lumayan! Namun butuh sedikit peninjauan materi ulang.";
+    else summary = "Jangan menyerah, mari pelajari kembali dan ulangi kuisnya.";
+    
+    document.getElementById("score-summary").innerText = summary;
+}
+
+function toggleAiModal() {
+    const modal = document.getElementById("aiModal");
+    modal.style.display = (modal.style.display === "block") ? "none" : "block";
+    document.getElementById("kalyteraWidget").style.display = "none";
+}
+
+function openAiWindow(url) {
+    const width = 420;
+    const height = 650;
+    const left = (window.screen.width / 2) - (width / 2);
+    const top = (window.screen.height / 2) - (height / 2);
+    window.open(url, '_blank', `width=${width},height=${height},top=${top},left=${left},scrollbars=yes,resizable=yes`);
+    document.getElementById("aiModal").style.display = "none";
+}
+
+function openKalytera() {
+    document.getElementById("aiModal").style.display = "none";
+    document.getElementById("kalyteraWidget").style.display = "flex";
+}
+
+function closeKalytera() {
+    document.getElementById("kalyteraWidget").style.display = "none";
+}
+
+window.onclick = function(event) {
+    const modal = document.getElementById("aiModal");
+    const btn = document.querySelector(".ai-floating-btn");
+    if (event.target !== modal && event.target !== btn && !btn.contains(event.target) && !modal.contains(event.target)) {
+        modal.style.display = "none";
+    }
+}
+
+showIntro();
+</script>
+
+</body>
+</html>
